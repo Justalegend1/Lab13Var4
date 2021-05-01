@@ -18,7 +18,7 @@ namespace Lab13Var4
                 //beg = collection.beg;
                 current = null;
             }
-            public T Current
+             public T Current
             {
                 get { return current.data; }
             }
