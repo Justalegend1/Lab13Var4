@@ -8,15 +8,39 @@ namespace Lab13Var4
 {
     class Program
     {
+        public static void WriteChangesAdd(int nom)//номер элемента, который добавили
+        {
+            Console.WriteLine($"В список добавили элемент c номером {nom}");
+        }
+        public static void WriteChengesDel(int nom)//номер удаленного элемента
+        {
+            Console.WriteLine($"Из списка удалили элемент с номером {nom}");
+        }
         static void Main(string[] args)
         {
-            Organization Org = new Organization("Организация", 235);
-            Factory Fac = new Factory("Фабрика", 450, 35, "Лондон");
-            Insurance_Company Ins = new Insurance_Company("Страховая компания", 600, 1990, 98);
-            Library Lib = new Library("Библиотека", 500, 7, 700);
-            Shipbuilding_company Ship = new Shipbuilding_company("Кораблестроительная фирма", 490, 900000, 35);
-            Organization[] mas = new Organization[5] { Org, Fac, Ins, Lib, Ship };
-            NewDoubleListConnection<Organization> n1 = new NewDoubleListConnection<Organization>(mas);
+            //подписываем методы на события
+            int CheckOnInteger(string c)//проверка числа на целое, в качестве параметра входит число или цифра
+            {
+                bool o = int.TryParse(c, out int number);
+                while (!o)
+                {
+                    Console.WriteLine("Введите целое число");
+                    o = int.TryParse(c, out number);
+                }
+                return number; 
+            }
+            Console.WriteLine("Введите размер пользовательской коллекции");
+            int size = CheckOnInteger(Console.ReadLine());
+            Factory[] Mas;
+            Mas = NewDoubleListConnection<Organization>.RandomFactory(size);
+            NewDoubleListConnection<Organization> Ndc = new NewDoubleListConnection<Organization>(Mas);
+            Ndc.AddTo += WriteChangesAdd;
+            Ndc.DelFrom += WriteChengesDel;
+            foreach (var b in Mas)
+                b.Show();
+            Ndc.Add(4);
+            Ndc.Delete(3);
+            Console.ReadKey();
         }
     }
 }

@@ -48,6 +48,33 @@ namespace Lab13Var4
                 current = this.beg;
             }
         }
+        //начало класса двусвязного списка
+        public delegate void ChangesAdd(int nom);//делегат с параметром длины списка на добавление в список
+        public delegate void ChangesDel(int nom);//передаем длину списка на удаление из списка
+        public event ChangesAdd AddTo;//событие при добавлении элемента в список
+        public event ChangesDel DelFrom;//событие при удалении элемента из списка 
+        public static Factory[] RandomFactory(int size)//метод для создания коллекции с элементами типа Factory выбранной длины
+        {
+            Factory[] MasFac = new Factory[size];
+            for (int k = 0; k < MasFac.Length; k++)
+            {
+                Factory Fact = new Factory();
+                Fact = (Factory)Fact.Init();
+                MasFac[k] = Fact;
+            }
+            return MasFac;
+        }
+        
+        public void ChanAdd(int nom)
+        {
+            if (AddTo != null)
+                AddTo(nom);
+        }
+        public void ChanDel(int nom)
+        {
+            if (DelFrom != null)
+                DelFrom(nom);
+        }
         public NewDoublePointConnection<Organization> beg = null;
         public class NewDoublePointConnection<T>
         {
@@ -114,6 +141,7 @@ namespace Lab13Var4
             get
             {
                 NewDoublePointConnection<Organization> k = beg;
+                k = k.next;
                 int count = 1;
                 while (k != beg)
                 {
@@ -135,12 +163,15 @@ namespace Lab13Var4
             dp1 = dp;
             dp = dp.next.next;
             dp.pred = dp1;
+            ChanDel(nom);
         }
         static Random rnd = new Random();
         public void Add(int nom, params Organization[] mas)
         {
+            Factory Fact = new Factory();
+            Fact = (Factory)Fact.Init();
             NewDoublePointConnection<Organization> p1 = beg;
-            NewDoublePointConnection<Organization> temp1 = new NewDoublePointConnection<Organization>(mas[rnd.Next(0, mas.Length - 1)]);
+            NewDoublePointConnection<Organization> temp1 = new NewDoublePointConnection<Organization>(Fact);
             NewDoublePointConnection<Organization> vr1;
             NewDoublePointConnection<Organization> vr2;
             NewDoublePointConnection<Organization> p2 = beg;
@@ -154,6 +185,7 @@ namespace Lab13Var4
             p1 = p1.next;
             p1.pred = vr1;
             p1.next = vr2;
+            ChanAdd(nom);
         }
         public void DeleteCollection(T beg)//нужно передать корень коллекции
         {
@@ -181,5 +213,9 @@ namespace Lab13Var4
         //    throw new NotImplementedException();
         //}
         //конец методов для нумератора
+        public void ChangeAdd()
+        { 
+        
+        }
     }
 }
