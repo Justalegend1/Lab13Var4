@@ -33,13 +33,17 @@ namespace Lab13Var4
             int size = CheckOnInteger(Console.ReadLine());
             Factory[] Mas;
             Mas = NewDoubleListConnection<Organization>.RandomFactory(size);
-            NewDoubleListConnection<Organization> Ndc = new NewDoubleListConnection<Organization>(Mas);
+            NewDoubleListConnection<Organization> Ndc = new NewDoubleListConnection<Organization>("Новая коллекция",Mas);
             Ndc.AddTo += WriteChangesAdd;
             Ndc.DelFrom += WriteChengesDel;
             foreach (var b in Mas)
                 b.Show();
-            Ndc.Add(4);
+            Console.WriteLine($"Название коллекции - {Ndc.NameColl}");
+            Organization org = new Organization();
+            org = (Organization)org.Init();
+            Ndc.Add(4, org);
             Ndc.Delete(3);
+            Ndc.AddDefault(3);
             Console.ReadKey();
         }
     }

@@ -9,6 +9,7 @@ namespace Lab13Var4
 {
     public class NewDoubleListConnection<T> : IEnumerable<T>
     {
+        public string name;
         class MyNumerator<T> : IEnumerator<T>
         {
             NewDoublePointConnection<T> beg;
@@ -53,6 +54,7 @@ namespace Lab13Var4
         public delegate void ChangesDel(int nom);//передаем длину списка на удаление из списка
         public event ChangesAdd AddTo;//событие при добавлении элемента в список
         public event ChangesDel DelFrom;//событие при удалении элемента из списка 
+
         public static Factory[] RandomFactory(int size)//метод для создания коллекции с элементами типа Factory выбранной длины
         {
             Factory[] MasFac = new Factory[size];
@@ -64,7 +66,10 @@ namespace Lab13Var4
             }
             return MasFac;
         }
-        
+        public string NameColl
+        {
+            get {return name ; }
+        }
         public void ChanAdd(int nom)
         {
             if (AddTo != null)
@@ -115,7 +120,7 @@ namespace Lab13Var4
         }
         public NewDoubleListConnection()
         { }
-        public NewDoubleListConnection(params Organization[] mas)
+        public NewDoubleListConnection(string Name, params Organization[] mas)//передаем элемененты коллекции и ее имя
         {
             NewDoublePointConnection<Organization> r;
             beg = new NewDoublePointConnection<Organization>(mas[0]);
@@ -153,39 +158,88 @@ namespace Lab13Var4
         }
         public void Delete(int nom)
         {
-            NewDoublePointConnection<Organization> dp1;
-            NewDoublePointConnection<Organization> dp = beg;
-            for (int t = 0; t < nom; t++)
+            if (nom > Length)
+                Console.WriteLine("Номер элемента находится за перделами границ списка");
+            else
             {
-                dp = dp.next;
+                NewDoublePointConnection<Organization> dp1;
+                NewDoublePointConnection<Organization> dp = beg;
+                for (int t = 0; t < nom; t++)
+                {
+                    dp = dp.next;
+                }
+                dp.next = dp.next.next;
+                dp1 = dp;
+                dp = dp.next.next;
+                dp.pred = dp1;
+                ChanDel(nom);
             }
-            dp.next = dp.next.next;
-            dp1 = dp;
-            dp = dp.next.next;
-            dp.pred = dp1;
-            ChanDel(nom);
+        }
+        int Length
+        {
+            get
+            {
+                int Length = 1;
+                NewDoublePointConnection<Organization> p1 = beg;
+                while (p1.next != beg)
+                {
+                    p1 = p1.next;
+                    Length++;
+                }
+                return Length;
+            }
         }
         static Random rnd = new Random();
-        public void Add(int nom, params Organization[] mas)
+        public void Add(int nom, Organization org,params Organization[] mas)//добавление введенного элемента в коллекцию
         {
-            Factory Fact = new Factory();
-            Fact = (Factory)Fact.Init();
-            NewDoublePointConnection<Organization> p1 = beg;
-            NewDoublePointConnection<Organization> temp1 = new NewDoublePointConnection<Organization>(Fact);
-            NewDoublePointConnection<Organization> vr1;
-            NewDoublePointConnection<Organization> vr2;
-            NewDoublePointConnection<Organization> p2 = beg;
-            for (int i = 1; i < nom; i++)
-                p2 = p2.next;
-            vr2 = p2;
-            for (int i = 1; i < nom - 1; i++)
+            if (nom > Length)
+                Console.WriteLine("Номер элемента находится за перделами границ списка");
+            else
+            {
+                NewDoublePointConnection<Organization> p1 = beg;
+                NewDoublePointConnection<Organization> temp1 = new NewDoublePointConnection<Organization>(org);
+                NewDoublePointConnection<Organization> vr1;
+                NewDoublePointConnection<Organization> vr2;
+                NewDoublePointConnection<Organization> p2 = beg;
+                for (int i = 1; i < nom; i++)
+                    p2 = p2.next;
+                vr2 = p2;
+                for (int i = 1; i < nom - 1; i++)
+                    p1 = p1.next;
+                vr1 = p1;
+                p1.next = temp1;
                 p1 = p1.next;
-            vr1 = p1;
-            p1.next = temp1;
-            p1 = p1.next;
-            p1.pred = vr1;
-            p1.next = vr2;
-            ChanAdd(nom);
+                p1.pred = vr1;
+                p1.next = vr2;
+                ChanAdd(nom);
+            }
+        }
+        //добавление случайного элемента в коллекцию
+        public void AddDefault(int nom)
+        {
+            if (nom > Length)
+                Console.WriteLine("Номер элемента находится за перделами границ списка");
+            else
+            {
+                Factory Fact = new Factory();
+                Fact = (Factory)Fact.Init();
+                NewDoublePointConnection<Organization> p1 = beg;
+                NewDoublePointConnection<Organization> temp1 = new NewDoublePointConnection<Organization>(Fact);
+                NewDoublePointConnection<Organization> vr1;
+                NewDoublePointConnection<Organization> vr2;
+                NewDoublePointConnection<Organization> p2 = beg;
+                for (int i = 1; i < nom; i++)
+                    p2 = p2.next;
+                vr2 = p2;
+                for (int i = 1; i < nom - 1; i++)
+                    p1 = p1.next;
+                vr1 = p1;
+                p1.next = temp1;
+                p1 = p1.next;
+                p1.pred = vr1;
+                p1.next = vr2;
+                ChanAdd(nom);
+            }
         }
         public void DeleteCollection(T beg)//нужно передать корень коллекции
         {
@@ -213,9 +267,5 @@ namespace Lab13Var4
         //    throw new NotImplementedException();
         //}
         //конец методов для нумератора
-        public void ChangeAdd()
-        { 
-        
-        }
     }
 }
