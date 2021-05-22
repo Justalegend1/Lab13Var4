@@ -4,12 +4,13 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace Lab13Var4
 {
-    public class NewDoubleListConnection<T> : IEnumerable<T>
+    public class NewDoubleListConnection<T> : Collection<Organization>, IEnumerable<T>
     {
-        public string name;
+        string name;
         class MyNumerator<T> : IEnumerator<T>
         {
             NewDoublePointConnection<T> beg;
@@ -33,7 +34,6 @@ namespace Lab13Var4
             //{
             //    get { throw  new NotImplementedException(); }
             //}
-
             public void Dispose()
             { }
             public bool MoveNext()
@@ -50,11 +50,14 @@ namespace Lab13Var4
             }
         }
         //начало класса двусвязного списка
-        public delegate void ChangesAdd(int nom);//делегат с параметром длины списка на добавление в список
-        public delegate void ChangesDel(int nom);//передаем длину списка на удаление из списка
+        public delegate void ChangesAdd(int nom, string Name);//делегат с параметром длины списка на добавление в список
+        public delegate void ChangesDel(int nom, string Name);//передаем длину списка на удаление из списка
         public event ChangesAdd AddTo;//событие при добавлении элемента в список
         public event ChangesDel DelFrom;//событие при удалении элемента из списка 
-
+        public event CollectionHandler CollectionReferenceChanged;//событие изменения ссылки одного из элементов коллекции
+        public event CollectionHandler CollectionCountChanged; //событие обработки добавления-удаления элемента из коллекции 
+        public delegate void CollectionHandler(object source, CollectionHandlerEventArgs args); //Делегат
+       
         public static Factory[] RandomFactory(int size)//метод для создания коллекции с элементами типа Factory выбранной длины
         {
             Factory[] MasFac = new Factory[size];
@@ -66,19 +69,31 @@ namespace Lab13Var4
             }
             return MasFac;
         }
-        public string NameColl
+        //обработчик события CollectionCountChanged
+        public void OnCollectionCountChanged(object source/*коллекция*/, CollectionHandlerEventArgs args)
         {
-            get {return name ; }
+            if (CollectionCountChanged != null)
+                CollectionCountChanged(source, args);
         }
-        public void ChanAdd(int nom)
+        //обработчик события OnCollectionReferenceChanged
+        public void OnCollectionReferenceChanged(object source/*коллекция*/, CollectionHandlerEventArgs args)
+        {
+            if (CollectionReferenceChanged != null)
+                CollectionReferenceChanged(source, args);
+        }
+        public string NameColl//свойство с именем коллекции
+        {
+            get {return name; }
+        }
+        public void ChanAdd(int nom, string Name)
         {
             if (AddTo != null)
-                AddTo(nom);
+                AddTo(nom,Name);
         }
-        public void ChanDel(int nom)
+        public void ChanDel(int nom, string Name)
         {
             if (DelFrom != null)
-                DelFrom(nom);
+                DelFrom(nom, Name);
         }
         public NewDoublePointConnection<Organization> beg = null;
         public class NewDoublePointConnection<T>
@@ -122,6 +137,7 @@ namespace Lab13Var4
         { }
         public NewDoubleListConnection(string Name, params Organization[] mas)//передаем элемененты коллекции и ее имя
         {
+            name = Name;
             NewDoublePointConnection<Organization> r;
             beg = new NewDoublePointConnection<Organization>(mas[0]);
             NewDoublePointConnection<Organization> p = beg;
@@ -156,10 +172,10 @@ namespace Lab13Var4
                 return count;
             }
         }
-        public void Delete(int nom)
+        public void Delete(int nom, string Name)
         {
             if (nom > Length)
-                Console.WriteLine("Номер элемента находится за перделами границ списка");
+                Console.WriteLine("Номер элемента находится за пределами границ списка");
             else
             {
                 NewDoublePointConnection<Organization> dp1;
@@ -172,9 +188,11 @@ namespace Lab13Var4
                 dp1 = dp;
                 dp = dp.next.next;
                 dp.pred = dp1;
-                ChanDel(nom);
+                ChanDel(nom, Name);
+                OnCollectionCountChanged(this, new CollectionHandlerEventArgs(NameColl, "Удаление", dp1));
             }
         }
+
         int Length
         {
             get
@@ -190,7 +208,7 @@ namespace Lab13Var4
             }
         }
         static Random rnd = new Random();
-        public void Add(int nom, Organization org,params Organization[] mas)//добавление введенного элемента в коллекцию
+        public void Add(int nom, Organization org, string Name, params Organization[] mas)//добавление введенного элемента в коллекцию
         {
             if (nom > Length)
                 Console.WriteLine("Номер элемента находится за перделами границ списка");
@@ -211,11 +229,13 @@ namespace Lab13Var4
                 p1 = p1.next;
                 p1.pred = vr1;
                 p1.next = vr2;
-                ChanAdd(nom);
+                ChanAdd(nom, Name);
+                OnCollectionCountChanged(this, new CollectionHandlerEventArgs(NameColl, "Дабавление", p2));
             }
         }
+        
         //добавление случайного элемента в коллекцию
-        public void AddDefault(int nom)
+        public void AddDefault(int nom, string Name)
         {
             if (nom > Length)
                 Console.WriteLine("Номер элемента находится за перделами границ списка");
@@ -238,7 +258,8 @@ namespace Lab13Var4
                 p1 = p1.next;
                 p1.pred = vr1;
                 p1.next = vr2;
-                ChanAdd(nom);
+                ChanAdd(nom, Name);
+                OnCollectionCountChanged(this, new CollectionHandlerEventArgs(NameColl, "Дабавление случайного элемента", p2));
             }
         }
         public void DeleteCollection(T beg)//нужно передать корень коллекции

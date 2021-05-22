@@ -48,6 +48,7 @@
     <Compile Include="Factory.cs" />
     <Compile Include="IInit.cs" />
     <Compile Include="Insurance_Company.cs" />
+    <Compile Include="Journal.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="NewDoubleListConnection.cs" />
     <Compile Include="Organization.cs" />
